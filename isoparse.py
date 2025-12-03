@@ -1,10 +1,11 @@
 import pycdlib
+from pycdlib.dr import DirectoryRecord
+from pycdlib.pycdlib import PyCdlib
 
 
-def print_file(iso: pycdlib.PyCdlib, dr, path_type: str):
+def print_file(iso: PyCdlib, dr: DirectoryRecord, path_type: str):
     """ディレクトリレコードからフルパスを取得して内容を表示"""
-    full_path = iso.full_path_from_dirrecord(dr, rockridge=(path_type == "rr_path"))
-    with iso.open_file_from_iso(**{path_type: full_path}) as fd:
+    full_path = iso.full_path_from_dirrecord(dr, rockridge=(path_type == "rr_path"))  
         content = fd.read()
         print("----- File Content -----")
         print(content.decode("utf-8", errors="ignore"))
