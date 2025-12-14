@@ -13,6 +13,7 @@ class iso_util(BaseModel, frozen=True):
     iso: PyCdlib = Field(default_factory=PyCdlib, init=False)
 
     def model_post_init(self, __context: object = None) -> None:
+        iso_bytes: bytes = context.get("iso_bytes")  # 型注釈だけ付ける
         try:
             import tempfile
             with tempfile.NamedTemporaryFile(delete=False) as tf:
