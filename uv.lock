@@ -1,0 +1,30 @@
+version = 1
+revision = 3
+requires-python = ">=3.13"
+
+[[package]]
+name = "good-design"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "lhafile" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "lhafile", specifier = ">=0.3.1" }]
+
+[[package]]
+name = "lhafile"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/ab/edc17ea008032b12e3fe6e2e9eeea0fde74f86cf5bf3df016eceb47ee06e/lhafile-0.3.1.tar.gz", hash = "sha256:a66a091e61af569384844ed74bf76179c575e5d28bc88bf9bf5476a3397d077d", size = 14541, upload-time = "2025-02-24T21:59:14.672Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f1/7d/210c424e8d2fa721a2c7a26bd0003ee62b324f1f4ffdf28b1708efd9f6e5/lhafile-0.3.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:06111b684ff4a980c689f97fe36fd839bbda0705a2460f7cfb3dde5d6d27fad4", size = 14719, upload-time = "2025-02-24T23:26:27.826Z" },
+    { url = "https://files.pythonhosted.org/packages/19/95/a649a35bb15729dc34abcfacaaafad20a3526bed2bd13564f42acb41ad75/lhafile-0.3.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:8eb23f81841cef17abcf8f507ef6969f43023c4f6d4bf763a4daa4ca29c829b1", size = 14824, upload-time = "2025-02-24T23:25:14.213Z" },
+    { url = "https://files.pythonhosted.org/packages/47/59/228c15ffd6aa90ded6c82fc14a6845405dd3a2fc499ac3868ac9954dc5f0/lhafile-0.3.1-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b6424fbe13c48fdd95b85c654b5bb8cc7fe606a0137d8e8cfac656acb4197031", size = 53927, upload-time = "2025-02-24T23:27:25.558Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/01/c0e2f06c3eb7feffadb80f487cb407da3920b67a033e3769a7df183a14db/lhafile-0.3.1-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:46dfd35f23ab42ae6a16f8deac46f9f3a9fbe79b4cf945d6f451a643500c0fff", size = 55953, upload-time = "2025-02-24T23:27:26.664Z" },
+    { url = "https://files.pythonhosted.org/packages/d1/e7/2b1209babdc88f8ab998253fa485a322afdca52de5a61a055bb1e55a1c1c/lhafile-0.3.1-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:0d61eb992d8f4dbcfc2345456e85fa0317c3def10b33966e1e64368fcf29dfeb", size = 56847, upload-time = "2025-02-24T23:27:28.171Z" },
+    { url = "https://files.pythonhosted.org/packages/77/6c/55cdfa56ce910a5f274991f73761ce8b7a42976d2571d08eb5e389184ce2/lhafile-0.3.1-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:d0bad1bd7f394f6799833fcb557d88f2b5ee364704a05ab47d5ded489fe99eb1", size = 58797, upload-time = "2025-02-24T23:27:29.98Z" },
+    { url = "https://files.pythonhosted.org/packages/38/cc/4cc138db0d499fb22b4b3ee71220288b09451310679b6dd48fae37c3ebfb/lhafile-0.3.1-cp313-cp313-win32.whl", hash = "sha256:0ca3bc909d335443af714bb35e76a69beab4039915692be0d1612da4768b4176", size = 16619, upload-time = "2025-02-24T23:35:03.179Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/4b/1a1f14f85c7e4270513aa5a0041cf65e45102710392ee2b38714bad58566/lhafile-0.3.1-cp313-cp313-win_amd64.whl", hash = "sha256:e2de020b1d1537d5f347dd29efa96fa78f4104b8a2a49bfc58e523788aef67e0", size = 18915, upload-time = "2025-02-24T23:35:04.072Z" },
+]
