@@ -14,7 +14,7 @@ def find_lzh_start(file_path):
     for match in reversed(list(pattern.finditer(data))):
         i = match.start()  # ヘッダー開始位置 (header_size)
         header_size = data[i]
-        if 20 <= header_size <= 200:  # reasonable header size
+        if header_size >= 24:  # reasonable header size (拡張ヘッダー対応で上限なし)
             return i  # ヘッダー開始位置
     return -1
 
