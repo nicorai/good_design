@@ -9,14 +9,13 @@ def find_lzh_start(file_path):
     with open(file_path, 'rb') as f:
         data = f.read()
     
-    pattern = re.compile(rb'-lh[0-9]-')
+    pattern = re.compile(rb'..-lh[0576d]-')
     # 後ろから探すため、finditer の結果を逆順に
     for match in reversed(list(pattern.finditer(data))):
-        i = match.start()  # method の開始位置
-        if i >= 2:  # header_size と checksum の位置がある
-            level = data[i + 3]
-            if chr(level).isdigit() and 0 <= int(chr(level)) <= 9:
-                return i - 2  # ヘッダー開始位置
+        i = match.start()  # ヘッダー開始位置 (header_size)
+        header_size = data[i]
+        if 20 <= header_size <= 200:  # reasonable header size
+            return i  # ヘッダー開始位置
     return -1
 
 
