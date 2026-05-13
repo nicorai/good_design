@@ -4,6 +4,15 @@ https://learn.microsoft.com/en-us/openspecs/main/ms-openspeclp/3589baea-5b22-48f
 https://learn.microsoft.com/en-us/openspecs/standards_support/ms-stdsuplp/17a32be7-10b3-4025-bea4-133a66b4c689
 
 
+# rfontの説明
+https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oi29500/aef3c9a6-5d6c-434b-90b7-85e761fd8e62
+
+# rfontの参照タイプ
+https://c-rex.net/samples/ooxml/e1/Part3/OOXML_P3_Primer_Font_topic_ID0EZHCI.html
+
+# rfont の 挙動
+https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oe376/dcf1caba-49a9-40e3-ba36-32b9e205434f
+
 
 word の 説明
 
