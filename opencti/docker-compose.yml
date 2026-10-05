@@ -1,0 +1,158 @@
+services:
+  redis:
+    image: redis:8.10.1
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.21
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${ELASTICSEARCH_HOST_PORT:-9200}:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+      - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs:ro
+    environment:
+      discovery.type: single-node
+      xpack.ml.enabled: "false"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: certs/elasticsearch.key
+      xpack.security.http.ssl.certificate: certs/elasticsearch.crt
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.verification_mode: certificate
+      xpack.security.transport.ssl.key: certs/elasticsearch.key
+      xpack.security.transport.ssl.certificate: certs/elasticsearch.crt
+      xpack.security.transport.ssl.certificate_authorities: certs/ca.crt
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in .env}
+      thread_pool.search.queue_size: "5000"
+      logger.org.elasticsearch.discovery: ERROR
+      ES_JAVA_OPTS: "-Xms${ELASTIC_MEMORY_SIZE:-4G} -Xmx${ELASTIC_MEMORY_SIZE:-4G}"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl -fsS --cacert /usr/share/elasticsearch/config/certs/ca.crt
+          -u elastic:$${ELASTIC_PASSWORD}
+          'https://elasticsearch:9200/_cluster/health?wait_for_status=yellow' >/dev/null
+          || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 45s
+
+  minio:
+    image: pgsty/silo:latest
+    restart: unless-stopped
+    volumes:
+      - s3data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+    command: server /data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:4.3-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:?Set RABBITMQ_DEFAULT_USER in .env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:?Set RABBITMQ_DEFAULT_PASS in .env}
+      RABBITMQ_NODENAME: rabbit01@localhost
+    volumes:
+      - amqpdata:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  opencti:
+    image: opencti/platform:6.9.29
+    restart: unless-stopped
+    environment:
+      NODE_OPTIONS: --max-old-space-size=${OPENCTI_NODE_MEMORY_SIZE:-4096}
+      APP__PORT: "8080"
+      APP__BASE_URL: ${OPENCTI_EXTERNAL_SCHEME:-http}://${OPENCTI_HOST:?Set OPENCTI_HOST in .env}:${OPENCTI_PORT:-8080}
+      APP__ADMIN__EMAIL: ${OPENCTI_ADMIN_EMAIL:?Set OPENCTI_ADMIN_EMAIL in .env}
+      APP__ADMIN__PASSWORD: ${OPENCTI_ADMIN_PASSWORD:?Set OPENCTI_ADMIN_PASSWORD in .env}
+      APP__ADMIN__TOKEN: ${OPENCTI_ADMIN_TOKEN:?Set OPENCTI_ADMIN_TOKEN in .env}
+      APP__ENCRYPTION_KEY: ${OPENCTI_ENCRYPTION_KEY:?Set OPENCTI_ENCRYPTION_KEY in .env}
+      APP__HEALTH_ACCESS_KEY: ${OPENCTI_HEALTHCHECK_ACCESS_KEY:?Set OPENCTI_HEALTHCHECK_ACCESS_KEY in .env}
+      PROVIDERS__LOCAL__STRATEGY: LocalStrategy
+      REDIS__HOSTNAME: redis
+      REDIS__PORT: "6379"
+      ELASTICSEARCH__URL: https://elasticsearch:9200
+      ELASTICSEARCH__USERNAME: elastic
+      ELASTICSEARCH__PASSWORD: ${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in .env}
+      ELASTICSEARCH__SSL__CA: /etc/opencti/certs/ca.crt
+      ELASTICSEARCH__SSL__REJECT_UNAUTHORIZED: "true"
+      ELASTICSEARCH__NUMBER_OF_REPLICAS: "0"
+      MINIO__ENDPOINT: minio
+      MINIO__PORT: "9000"
+      MINIO__USE_SSL: "false"
+      MINIO__ACCESS_KEY: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      MINIO__SECRET_KEY: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+      RABBITMQ__HOSTNAME: rabbitmq
+      RABBITMQ__PORT: "5672"
+      RABBITMQ__PORT_MANAGEMENT: "15672"
+      RABBITMQ__MANAGEMENT_SSL: "false"
+      RABBITMQ__USERNAME: ${RABBITMQ_DEFAULT_USER:?Set RABBITMQ_DEFAULT_USER in .env}
+      RABBITMQ__PASSWORD: ${RABBITMQ_DEFAULT_PASS:?Set RABBITMQ_DEFAULT_PASS in .env}
+      SMTP__HOSTNAME: ${SMTP_HOSTNAME:-localhost}
+      SMTP__PORT: ${SMTP_PORT:-25}
+    volumes:
+      - ./certs/opencti:/etc/opencti/certs:ro
+    ports:
+      - "${OPENCTI_PORT:-8080}:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -qO-
+        - http://opencti:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  worker:
+    image: opencti/worker:6.9.29
+    restart: unless-stopped
+    environment:
+      OPENCTI_URL: http://opencti:8080
+      OPENCTI_TOKEN: ${OPENCTI_ADMIN_TOKEN:?Set OPENCTI_ADMIN_TOKEN in .env}
+    depends_on:
+      opencti:
+        condition: service_healthy
+
+volumes:
+  esdata:
+  s3data:
+  redisdata:
+  amqpdata:
